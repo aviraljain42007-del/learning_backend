@@ -64,7 +64,8 @@ const orderSchema = new mongoose.Schema(
       status: {
         type: String,
         default: "Not Paid"
-      }
+      },
+      paidAt: Date
     },
 
     itemsPrice: {
@@ -98,5 +99,12 @@ const orderSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Indexes for order queries
+orderSchema.index({ user: 1 }); // Find orders by user
+orderSchema.index({ createdAt: -1 }); // Sort by creation date
+orderSchema.index({ orderStatus: 1 }); // Filter by status
+orderSchema.index({ "paymentInfo.status": 1 }); // Filter by payment status
+orderSchema.index({ user: 1, createdAt: -1 }); // Compound index for user orders sorted by date
 
 module.exports = mongoose.model("Order", orderSchema);

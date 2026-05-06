@@ -1,128 +1,78 @@
-const Order = require("../models/order");
-const User = require("../models/user");
-const Product = require("../models/product");
+const orderService = require("../services/orderService");
+const asyncHandler = require("../utils/asynchandler");
 
-// helper: product stock reduce
-async function updateStock(productId, quantity) {
-  const product = await Product.findById(productId);
+exports.createOrder = asyncHandler(async (req, res) => {
+  const { shippingInfo } = req.body;
 
-  product.stock -= quantity;
+  const order = await orderService.createOrder(req.user._id, shippingInfo);
 
-  await product.save({ validateBeforeSave: false });
-}
+  res.status(201).json({
+    success: true,
+    message: "Order placed successfully",
+    order,
+  });
+});
 
-exports.createOrder = async (req, res) => {
-  try {
-    const { shippingInfo } = req.body;
+exports.getMyOrders = asyncHandler(async (req, res) => {
+  const orders = await orderService.getUserOrders(req.user._id);
 
-    const user = await User.findById(req.user._id).populate("cart.product");
+  res.status(200).json({
+    success: true,
+    count: orders.length,
+    orders,
+  });
+});
 
-    if (user.cart.length === 0) {
-      return res.status(400).json({
-        success: false,
-        message: "Cart is empty"
-      });
-    }
+exports.getSingleOrder = asyncHandler(async (req, res) => {
+  const order = await orderService.getSingleOrder(req.params.id);
 
-    const orderItems = user.cart.map((item) => {
-      return {
-        product: item.product._id,
-        name: item.product.name,
-        price: item.product.price,
-        quantity: item.quantity
-      };
-    });
+  res.status(200).json({
+    success: true,
+    order,
+  });
+});
 
-    const itemsPrice = orderItems.reduce((total, item) => {
-      return total + item.price * item.quantity;
-    }, 0);
+exports.updateOrderStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
 
-    const taxPrice = Math.round(itemsPrice * 0.18);
-    const shippingPrice = itemsPrice > 500 ? 0 : 50;
-    const totalPrice = itemsPrice + taxPrice + shippingPrice;
-    for (const item of orderItems) {
-  const product = await Product.findById(item.product);
+  const order = await orderService.updateOrderStatus(req.params.id, status);
 
-  if (!product || product.stock < item.quantity) {
-    return res.status(400).json({
-      success: false,
-      message: `Insufficient stock for ${item.name}`
-    });
-  }
-}
+  res.status(200).json({
+    success: true,
+    message: "Order status updated",
+    order,
+  });
+});
 
-    const order = await Order.create({
-      user: req.user._id,
-      orderItems,
-      shippingInfo,
-      itemsPrice,
-      taxPrice,
-      shippingPrice,
-      totalPrice
-    });
+exports.updatePaymentStatus = asyncHandler(async (req, res) => {
+  const { status } = req.body;
 
-    // Stock reduce after order placed
-    for (const item of orderItems) {
-      await updateStock(item.product, item.quantity);
-    }
+  const order = await orderService.updatePaymentStatus(req.params.id, status);
 
-    // Cart clear
-    user.cart = [];
-    await user.save();
+  res.status(200).json({
+    success: true,
+    message: "Payment status updated",
+    order,
+  });
+});
 
-    res.status(201).json({
-      success: true,
-      message: "Order placed successfully",
-      order
-    });
+// Admin: Get all orders
+exports.getAllOrders = asyncHandler(async (req, res) => {
+  const orders = await orderService.getAllOrders();
 
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message
-    });
-  }
-};
+  res.status(200).json({
+    success: true,
+    count: orders.length,
+    orders,
+  });
+});
 
-exports.getMyOrders = async (req, res) => {
-  try {
-    const orders = await Order.find({ user: req.user._id });
+// Admin: Get order statistics
+exports.getOrderStats = asyncHandler(async (req, res) => {
+  const stats = await orderService.getOrderStats();
 
-    res.status(200).json({
-      success: true,
-      count: orders.length,
-      orders,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
-
-exports.getSingleOrder = async (req, res) => {
-  try {
-    const order = await Order.findById(req.params.id).populate(
-      "user",
-      "name email",
-    );
-
-    if (!order) {
-      return res.status(404).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      order,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: error.message,
-    });
-  }
-};
+  res.status(200).json({
+    success: true,
+    stats,
+  });
+});
