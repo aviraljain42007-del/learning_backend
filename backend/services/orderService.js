@@ -98,13 +98,13 @@ class OrderService {
 
   // Get all orders of a user
   async getUserOrders(userId) {
-    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 });
+    const orders = await Order.find({ user: userId }).sort({ createdAt: -1 }).lean();
     return orders;
   }
 
   // Get single order by ID
   async getSingleOrder(orderId) {
-    const order = await Order.findById(orderId).populate("user", "name email");
+    const order = await Order.findById(orderId).populate("user", "name email").lean();
     if (!order) {
       throw new ApiError(404, "Order not found");
     }
@@ -157,7 +157,7 @@ class OrderService {
 
   // Get all orders (admin)
   async getAllOrders() {
-    const orders = await Order.find().sort({ createdAt: -1 });
+    const orders = await Order.find().sort({ createdAt: -1 }).lean();
     return orders;
   }
 

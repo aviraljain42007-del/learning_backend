@@ -1,30 +1,12 @@
 const Product = require("../models/product");
 const cloudinary = require("../config/cloudinary");
 const ApiError = require("../utils/errorhandler");
+const redisClient = require("../config/redis");
+
 
 class ProductService {
   // Create new product
-  async createProduct(productData, userId, imageBuffer) {
-    let imageData = {};
-
-    if (imageBuffer) {
-      try {
-        imageData = await this.uploadImage(imageBuffer);
-      } catch (error) {
-        throw new ApiError(500, "Image upload failed");
-      }
-    }
-
-    const product = await Product.create({
-      ...productData,
-      createdBy: userId,
-      image: imageData,
-    });
-
-    return product;
-  }
-
-  // Upload image to cloudinary
+    // Upload image to cloudinary
   async uploadImage(buffer) {
     return new Promise((resolve, reject) => {
       const stream = cloudinary.v2.uploader.upload_stream(
@@ -44,8 +26,41 @@ class ProductService {
     });
   }
 
+  async createProduct(productData, userId, imageBuffer) {
+    let imageData = {};
+
+    if (imageBuffer) {
+      try {
+        imageData = await this.uploadImage(imageBuffer);
+      } catch (error) {
+        throw new ApiError(500, "Image upload failed");
+      }
+    }
+
+    const product = await Product.create({
+      ...productData,
+      createdBy: userId,
+      image: imageData,
+    });
+
+    await this.invalidateProductCache();
+
+    return product;
+  }
+
+
   // Get products with filters and pagination
   async getProducts(query, page = 1, limit = 8) {
+    const cacheKey = `products:${JSON.stringify(query)}:page${page}:limit${limit}`;
+    try {
+      const cachedResult = await redisClient.get(cacheKey);
+      if (cachedResult) {
+        return JSON.parse(cachedResult);
+      }
+    } catch (err) {
+      console.error("Redis get error:", err);
+    }
+
     const keyword = query.keyword ? { $text: { $search: query.keyword } } : {};
     const category = query.category ? { category: query.category } : {};
 
@@ -72,23 +87,49 @@ class ProductService {
       productQuery = productQuery.sort({ createdAt: -1 });
     }
 
-    const products = await productQuery;
+    const products = await productQuery.lean();
 
-    return {
+    const result = {
       totalProducts,
       filteredProductsCount,
       page,
       count: products.length,
       products,
     };
+
+    try {
+      // Cache for 1 hour (3600 seconds)
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(result));
+    } catch (err) {
+      console.error("Redis set error:", err);
+    }
+
+    return result;
   }
 
   // Get single product by ID
   async getSingleProduct(productId) {
-    const product = await Product.findById(productId);
+    const cacheKey = `product:${productId}`;
+    try {
+      const cachedProduct = await redisClient.get(cacheKey);
+      if (cachedProduct) {
+        return JSON.parse(cachedProduct);
+      }
+    } catch (err) {
+      console.error("Redis get error:", err);
+    }
+
+    const product = await Product.findById(productId).lean();
     if (!product) {
       throw new ApiError(404, "Product not found");
     }
+
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(product));
+    } catch (err) {
+      console.error("Redis set error:", err);
+    }
+
     return product;
   }
 
@@ -112,6 +153,9 @@ class ProductService {
       runValidators: true,
     });
 
+    await this.invalidateProductCache();
+    await this.invalidateSingleProductCache(productId);
+
     return product;
   }
 
@@ -127,11 +171,14 @@ class ProductService {
     }
 
     await Product.findByIdAndDelete(productId);
+
+    await this.invalidateProductCache();
+    await this.invalidateSingleProductCache(productId);
   }
 
   // Create or update product review
   async createProductReview(productId, userId, userName, rating, comment) {
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).lean();
     if (!product) {
       throw new ApiError(404, "Product not found");
     }
@@ -183,6 +230,9 @@ class ProductService {
       { new: true }
     );
 
+    await this.invalidateProductCache();
+    await this.invalidateSingleProductCache(productId);
+
     return updatedProduct;
   }
 
@@ -209,12 +259,15 @@ class ProductService {
       { new: true }
     );
 
+    await this.invalidateProductCache();
+    await this.invalidateSingleProductCache(productId);
+
     return finalProduct;
   }
 
   // Get product reviews
   async getProductReviews(productId) {
-    const product = await Product.findById(productId);
+    const product = await Product.findById(productId).lean();
     if (!product) {
       throw new ApiError(404, "Product not found");
     }
@@ -226,6 +279,25 @@ class ProductService {
     if (reviews.length === 0) return 0;
     const totalRating = reviews.reduce((sum, rev) => sum + rev.rating, 0);
     return totalRating / reviews.length;
+  }
+
+  async invalidateProductCache() {
+    try {
+      const keys = await redisClient.keys("products:*");
+      if (keys.length > 0) {
+        await redisClient.del(keys);
+      }
+    } catch (err) {
+      console.error("Cache invalidation error:", err);
+    }
+  }
+
+  async invalidateSingleProductCache(productId) {
+    try {
+      await redisClient.del(`product:${productId}`);
+    } catch (err) {
+      console.error("Cache invalidation error:", err);
+    }
   }
 }
 

@@ -4,15 +4,16 @@ const cookieparser = require("cookie-parser")
 const userroutes = require("./routes/userroutes")
 const productroutes = require("./routes/productroutes")
 const orderroutes = require("./routes/orderroutes")
+const urlroutes = require("./routes/urlroutes")
 const errorMiddleware = require("./middleware/errorMiddleware")
 const mongoSanitize = require("express-mongo-sanitize")
-const limiter = require("./middleware/rateLimiter")
+const rateLimit = require("./middleware/rateLimiter")
 
 const app = express()
 
 app.use(express.json())
 app.use(cors({
-    origin : "https://localhost:5173",
+    origin : process.env.FRONTEND_URL,
     credentials : true
 }))
 app.use(cookieparser())
@@ -21,11 +22,12 @@ app.use(cookieparser())
 app.use(mongoSanitize())
 
 // Apply rate limiting to all requests
-app.use(limiter)
+app.use(rateLimit)
 
 app.use("/api/user" , userroutes)
 app.use("/api", productroutes)
 app.use("/api", orderroutes)
+app.use("/api/s", urlroutes)
 
 app.get("/" , (req , res) =>{
     res.send("api running")

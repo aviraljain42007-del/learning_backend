@@ -10,7 +10,7 @@ class UserService {
       throw new ApiError(400, "Please fill all the fields");
     }
 
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({ email }).lean();
     if (existingUser) {
       throw new ApiError(400, "User already exists");
     }
@@ -26,13 +26,14 @@ class UserService {
     return user;
   }
 
+  
   // Login user and generate token
   async login(email, password) {
     if (!email || !password) {
       throw new ApiError(400, "Fill all details");
     }
 
-    const user = await User.findOne({ email });
+    const user = await User.findOne({ email }).lean();
     if (!user) {
       throw new ApiError(401, "Wrong email or password");
     }
@@ -53,7 +54,7 @@ class UserService {
 
   // Get user profile
   async getProfile(userId) {
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).lean();
     if (!user) {
       throw new ApiError(404, "User not found");
     }
@@ -66,7 +67,7 @@ class UserService {
       throw new ApiError(400, "Quantity must be greater than 0");
     }
 
-    const user = await User.findById(userId);
+    const user = await User.findById(userId).lean();
     if (!user) {
       throw new ApiError(404, "User not found");
     }
@@ -148,7 +149,7 @@ class UserService {
 
   // Get user cart
   async getCart(userId) {
-    const user = await User.findById(userId).populate("cart.product");
+    const user = await User.findById(userId).populate("cart.product").lean();
     if (!user) {
       throw new ApiError(404, "User not found");
     }
