@@ -37,6 +37,9 @@ const userschema = new mongoose.Schema({
       },
     },
   ],
+  refreshToken: {
+    type: String,
+  },
 }, { timestamps: true });
 
 const User = mongoose.model("user", userschema);

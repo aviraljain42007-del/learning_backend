@@ -1,6 +1,8 @@
 const userService = require("../services/userService");
 const asyncHandler = require("../utils/asynchandler");
 const ApiError = require("../utils/errorhandler");
+const jwt = require("jsonwebtoken");
+const User = require("../models/user");
 
 exports.testuser = (req, res) => {
   res.send("controller is working");
@@ -29,11 +31,18 @@ exports.register = asyncHandler(async (req, res) => {
 exports.login = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
-  const { user, token } = await userService.login(email, password);
+  const { user, accessToken, refreshToken } = await userService.login(email, password);
 
-  res.status(200).cookie("token", token, {
-    httpOnly: true,
-    secure: false,
+  res.cookie("accessToken", accessToken, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: 15 * 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
     sameSite: "lax",
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
@@ -42,14 +51,23 @@ exports.login = asyncHandler(async (req, res) => {
     success: true,
     message: "Login successful",
     user,
-    token,
   });
 });
 
-exports.logout = (req, res) => {
+exports.logout = asyncHandler(async (req, res) => {
+  const refreshToken = req.cookies.refreshToken;
+  
+  if (refreshToken) {
+    await User.findOneAndUpdate({ refreshToken }, { $unset: { refreshToken: 1 } });
+  }
+
   res
     .status(200)
-    .cookie("token", "", {
+    .cookie("accessToken", "", {
+      httpOnly: true,
+      expires: new Date(0),
+    })
+    .cookie("refreshToken", "", {
       httpOnly: true,
       expires: new Date(0),
     })
@@ -57,7 +75,8 @@ exports.logout = (req, res) => {
       success: true,
       message: "Logged out successfully",
     });
-};
+});
+
 
 exports.adminboard = (req, res) => {
   res.status(200).json({

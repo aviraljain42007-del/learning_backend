@@ -43,13 +43,21 @@ class UserService {
       throw new ApiError(401, "Wrong email or password");
     }
 
-    const token = jwt.sign(
+    const accessToken = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: process.env.JWT_EXPIRE }
     );
 
-    return { user, token };
+    const refreshToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRE }
+    );
+
+    await User.findByIdAndUpdate(user._id, { refreshToken });
+
+    return { user, accessToken, refreshToken };
   }
 
   // Get user profile

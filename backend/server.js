@@ -3,9 +3,10 @@ require("dotenv").config()
 
 const app = require("./app")
 const connectdb = require("./config/db")
+const redisClient = require("./config/redis")
 
 connectdb()
-//console.log(process.cwd())
+redisClient.connect().catch(console.error)
 const PORT = process.env.PORT
 
 
