@@ -33,7 +33,8 @@ class ProductService {
       try {
         imageData = await this.uploadImage(imageBuffer);
       } catch (error) {
-        throw new ApiError(500, "Image upload failed");
+        console.log(error)
+        throw new ApiError(500, "Image uploadING1 failed");
       }
     }
 
@@ -51,84 +52,113 @@ class ProductService {
 
   // Get products with filters and pagination
   async getProducts(query, page = 1, limit = 8) {
-    const cacheKey = `products:${JSON.stringify(query)}:page${page}:limit${limit}`;
-    try {
-      const cachedResult = await redisClient.get(cacheKey);
-      if (cachedResult) {
-        return JSON.parse(cachedResult);
+  // const cacheKey = `products:${JSON.stringify(query)}:page${page}:limit${limit}`;
+  // try {
+  //   const cachedResult = await redisClient.get(cacheKey);
+  //   if (cachedResult) {
+  //     return JSON.parse(cachedResult);
+  //   }
+  // } catch (err) {
+  //   console.error("Redis get error:", err);
+  // }
+
+  const keyword = query.keyword
+    ? { $text: { $search: query.keyword } }
+    : {};
+
+  const category = query.category
+    ? {
+        category: {
+          $regex: `^${query.category.trim()}$`,
+          $options: "i",
+        },
       }
-    } catch (err) {
-      console.error("Redis get error:", err);
+    : {};
+
+  const priceFilter = {};
+
+  const minPrice = query.price?.gte || query["price[gte]"];
+  const maxPrice = query.price?.lte || query["price[lte]"];
+
+  if (minPrice || maxPrice) {
+    priceFilter.price = {};
+
+    if (minPrice) {
+      priceFilter.price.$gte = Number(minPrice);
     }
 
-    const keyword = query.keyword ? { $text: { $search: query.keyword } } : {};
-    const category = query.category ? { category: query.category } : {};
-
-    const copyQuery = { ...query };
-    const removeFields = ["keyword", "page", "limit", "category"];
-    removeFields.forEach((key) => delete copyQuery[key]);
-
-    let queryStr = JSON.stringify(copyQuery);
-    queryStr = queryStr.replace(/\b(gte|lte)\b/g, (key) => `$${key}`);
-    const priceFilter = JSON.parse(queryStr);
-
-    const finalQuery = { ...keyword, ...category, ...priceFilter };
-
-    const totalProducts = await Product.countDocuments();
-    const filteredProductsCount = await Product.countDocuments(finalQuery);
-
-    const skip = (page - 1) * limit;
-
-    let productQuery = Product.find(finalQuery).limit(limit).skip(skip);
-
-    if (query.keyword) {
-      productQuery = productQuery.sort({ score: { $meta: "textScore" } });
-    } else {
-      productQuery = productQuery.sort({ createdAt: -1 });
+    if (maxPrice) {
+      priceFilter.price.$lte = Number(maxPrice);
     }
-
-    const products = await productQuery.lean();
-
-    const result = {
-      totalProducts,
-      filteredProductsCount,
-      page,
-      count: products.length,
-      products,
-    };
-
-    try {
-      // Cache for 1 hour (3600 seconds)
-      await redisClient.setEx(cacheKey, 3600, JSON.stringify(result));
-    } catch (err) {
-      console.error("Redis set error:", err);
-    }
-
-    return result;
   }
 
+  const finalQuery = {
+    ...keyword,
+    ...category,
+    ...priceFilter,
+  };
+
+  console.log("req.query:", query);
+  console.log("finalQuery:", finalQuery);
+
+  const totalProducts = await Product.countDocuments();
+  const filteredProductsCount = await Product.countDocuments(finalQuery);
+
+  const skip = (page - 1) * limit;
+
+  let productQuery = Product.find(finalQuery).limit(limit).skip(skip);
+
+  if (query.keyword) {
+    productQuery = productQuery.sort({
+      score: { $meta: "textScore" },
+    });
+  } else {
+    productQuery = productQuery.sort({
+      createdAt: -1,
+    });
+  }
+
+  const products = await productQuery.lean();
+
+  const result = {
+    totalProducts,
+    filteredProductsCount,
+    page,
+    count: products.length,
+    products,
+  };
+
+  // try {
+    //   // Cache for 1 hour (3600 seconds)
+    //   await redisClient.setEx(cacheKey, 60 , JSON.stringify(result));
+    // } catch (err) {
+    //   console.error("Redis set error:", err);
+    // }
+
+  return result;
+}
   // Get single product by ID
   async getSingleProduct(productId) {
-    const cacheKey = `product:${productId}`;
-    try {
-      const cachedProduct = await redisClient.get(cacheKey);
-      if (cachedProduct) {
-        return JSON.parse(cachedProduct);
-      }
-    } catch (err) {
-      console.error("Redis get error:", err);
-    }
+    // const cacheKey = `product:${productId}`;
+    // try {
+    //   const cachedProduct = await redisClient.get(cacheKey);
+    //   if (cachedProduct) {
+    //     return JSON.parse(cachedProduct);
+    //   }
+    // } catch (err) {
+    //   console.error("Redis get error:", err);
+    // }
 
     const product = await Product.findById(productId).lean();
     if (!product) {
       throw new ApiError(404, "Product not found");
     }
 
-    try {
-      await redisClient.setEx(cacheKey, 3600, JSON.stringify(product));
-    } catch (err) {
-      console.error("Redis set error:", err);
-    }
+    // try {
+    //   await redisClient.setEx(cacheKey, 3600, JSON.stringify(product));
+    // } catch (err) {
+    //   console.error("Redis set error:", err);
+    // }
 
     return product;
   }
@@ -146,17 +176,18 @@ class ProductService {
       }
       const imageData = await this.uploadImage(imageBuffer);
       updateData.image = imageData;
+      
     }
 
-    product = await Product.findByIdAndUpdate(productId, updateData, {
+    let updatedProduct = await Product.findByIdAndUpdate(productId, updateData, {
       new: true,
       runValidators: true,
     });
 
-    await this.invalidateProductCache();
-    await this.invalidateSingleProductCache(productId);
+    // await this.invalidateProductCache();
+    // await this.invalidateSingleProductCache(productId);
 
-    return product;
+    return updatedProduct;
   }
 
   // Delete product
@@ -183,13 +214,13 @@ class ProductService {
       throw new ApiError(404, "Product not found");
     }
 
-    const existingReviewIndex = product.reviews.findIndex(
+    const alreadyReviewed = product.reviews.some(
       (rev) => rev.user.toString() === userId.toString()
     );
 
     let updatedProduct;
 
-    if (existingReviewIndex !== -1) {
+    if (alreadyReviewed === true) {
       updatedProduct = await Product.findByIdAndUpdate(
         productId,
         {

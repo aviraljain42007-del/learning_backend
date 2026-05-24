@@ -4,22 +4,11 @@ const ApiError = require("../utils/errorhandler");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user");
 
-exports.testuser = (req, res) => {
-  res.send("controller is working");
-};
-
-exports.getprofile = asyncHandler(async (req, res) => {
-  res.status(200).json({
-    success: true,
-    message: "Protected profile accessed",
-    user: req.user,
-  });
-});
 
 exports.register = asyncHandler(async (req, res) => {
-  const { name, email, password } = req.body;
+  const { name, email, password , role } = req.body;
 
-  const user = await userService.register(name, email, password);
+  const user = await userService.register(name, email, password ,role);
 
   res.status(201).json({
     success: true,
@@ -29,6 +18,7 @@ exports.register = asyncHandler(async (req, res) => {
 });
 
 exports.login = asyncHandler(async (req, res) => {
+  console.log("welcome")
   const { email, password } = req.body;
 
   const { user, accessToken, refreshToken } = await userService.login(email, password);
@@ -110,8 +100,8 @@ exports.getMyCart = asyncHandler(async (req, res) => {
 });
 
 exports.updateCartQuantity = asyncHandler(async (req, res) => {
-  const { productId, quantity } = req.body;
-
+  const  productId = req.params.id;
+  const {quantity}= req.body;
   const updatedUser = await userService.updateCartQuantity(
     req.user._id,
     productId,
@@ -126,7 +116,7 @@ exports.updateCartQuantity = asyncHandler(async (req, res) => {
 });
 
 exports.removeFromCart = asyncHandler(async (req, res) => {
-  const { productId } = req.body;
+  const productId  = req.params.id;
 
   const updatedUser = await userService.removeFromCart(
     req.user._id,
@@ -139,3 +129,16 @@ exports.removeFromCart = asyncHandler(async (req, res) => {
     cart: updatedUser.cart,
   });
 });
+
+exports.getuser = asyncHandler(async (req, res) => {
+  const user = req.user
+
+  if(!user){
+    throw new ApiError(404, "user not found")
+  }
+
+  res.status(200).json({
+    success: true,
+    user
+  })
+})

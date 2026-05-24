@@ -19,15 +19,15 @@ app.use(cors({
 app.use(cookieparser())
 
 // Sanitize data against NoSQL query injection
-app.use(mongoSanitize())
+//app.use(mongoSanitize())
 
 // Apply rate limiting to all requests
-app.use(rateLimit)
+// app.use(rateLimit)
 
-app.use("/api/user" , userroutes)
+app.use("/api" , userroutes)
 app.use("/api", productroutes)
 app.use("/api", orderroutes)
-app.use("/api/s", urlroutes)
+app.use("/api", urlroutes)
 
 app.get("/" , (req , res) =>{
     res.send("api running")

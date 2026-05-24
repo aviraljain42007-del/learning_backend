@@ -7,6 +7,7 @@ const ApiError = require("../utils/errorhandler");
 class OrderService {
   // Create order with transaction
   async createOrder(userId, shippingInfo) {
+    
     const session = await mongoose.startSession();
     session.startTransaction();
 
@@ -14,7 +15,7 @@ class OrderService {
       const user = await User.findById(userId)
         .populate("cart.product")
         .session(session);
-
+       console.log(user)
       if (!user) {
         await session.abortTransaction();
         throw new ApiError(404, "User not found");
@@ -30,6 +31,7 @@ class OrderService {
         name: item.product.name,
         price: item.product.price,
         quantity: item.quantity,
+        image : item.product.image.url
       }));
 
       const itemsPrice = orderItems.reduce(
@@ -112,16 +114,13 @@ class OrderService {
   }
 
   // Update order status
-  async updateOrderStatus(orderId, status) {
-    const updateData = {
-      orderStatus: status,
-    };
-
-    if (status === "Delivered") {
+  async updateOrderStatus(orderId, orderStatus) {
+    
+    if (orderStatus === "Delivered") {
       updateData.deliveredAt = new Date();
     }
 
-    const order = await Order.findByIdAndUpdate(orderId, updateData, {
+    const order = await Order.findByIdAndUpdate(orderId, {orderStatus}, {
       new: true,
       runValidators: true,
     });
@@ -187,6 +186,16 @@ class OrderService {
       totalRevenue: totalRevenue[0]?.total || 0,
       ordersByStatus,
     };
+  }
+
+  async deleteOrder(orderid){
+    const order = await Order.findById(orderid)
+
+    if(!order){
+      throw new ApiError(400 , "Order not found")
+    }
+
+    await Order.findByIdAndDelete(orderid)
   }
 }
 

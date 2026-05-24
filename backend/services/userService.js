@@ -2,10 +2,11 @@ const User = require("../models/user");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const ApiError = require("../utils/errorhandler");
+const Product = require("../models/product") 
 
 class UserService {
   // Register new user
-  async register(name, email, password) {
+  async register(name, email, password , role) {
     if (!name || !email || !password) {
       throw new ApiError(400, "Please fill all the fields");
     }
@@ -21,6 +22,7 @@ class UserService {
       name,
       email,
       password: hashedPassword,
+      role
     });
 
     return user;
@@ -89,9 +91,9 @@ class UserService {
       // Update existing cart item quantity
       updatedUser = await User.findByIdAndUpdate(
         userId,
-        { $inc: { "cart.$[elem].quantity": Number(quantity) } },
+        { $inc: { "cart.$[element].quantity": Number(quantity) } },
         {
-          arrayFilters: [{ "elem.product": productId }],
+          arrayFilters: [{ "element.product": productId }],
           new: true,
           runValidators: true,
         }
@@ -120,6 +122,14 @@ class UserService {
     if (!quantity || quantity <= 0) {
       throw new ApiError(400, "Quantity must be greater than 0");
     }
+
+    const product = await Product.findById(productId)
+
+    if(quantity > product.stock){
+      throw new ApiError(400, "Quantity cannot be greater than the stock")
+    }
+
+
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,

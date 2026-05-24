@@ -2,9 +2,8 @@ const orderService = require("../services/orderService");
 const asyncHandler = require("../utils/asynchandler");
 
 exports.createOrder = asyncHandler(async (req, res) => {
-  const { shippingInfo } = req.body;
-
-  const order = await orderService.createOrder(req.user._id, shippingInfo);
+  const { shippingAddress } = req.body;
+  const order = await orderService.createOrder(req.user._id, shippingAddress);
 
   res.status(201).json({
     success: true,
@@ -76,3 +75,16 @@ exports.getOrderStats = asyncHandler(async (req, res) => {
     stats,
   });
 });
+
+//delete order(admin)
+
+exports.deleteOrder = asyncHandler(async (req, res) =>{
+  const orderId = req.params.id
+
+  await orderService.deleteOrder(orderId)
+
+  res.status(200).json({
+    success : true,
+    message : "Order deleted Successfully"
+  })
+})

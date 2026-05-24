@@ -38,10 +38,12 @@ exports.getsingleproduct = asyncHandler(async (req, res) => {
 });
 
 exports.updateproduct = asyncHandler(async (req, res) => {
+  
   const product = await productService.updateProduct(
     req.params.id,
     req.body,
-    req.file?.buffer
+    req.file?.buffer,
+    
   );
 
   res.status(200).json({
@@ -61,14 +63,14 @@ exports.deleteProduct = asyncHandler(async (req, res) => {
 });
 
 exports.createproductreview = asyncHandler(async (req, res) => {
-  const { rating, coomment } = req.body;
+  const { rating, comment } = req.body;
 
   const product = await productService.createProductReview(
     req.params.id,
     req.user._id,
     req.user.name,
     rating,
-    coomment
+    comment
   );
 
   res.status(200).json({
