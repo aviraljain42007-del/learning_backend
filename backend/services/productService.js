@@ -51,7 +51,7 @@ class ProductService {
 
 
   // Get products with filters and pagination
-  async getProducts(query, page = 1, limit = 8) {
+  async getProducts(query, page, limit) {
   // const cacheKey = `products:${JSON.stringify(query)}:page${page}:limit${limit}`;
   // try {
   //   const cachedResult = await redisClient.get(cacheKey);
@@ -97,9 +97,6 @@ class ProductService {
     ...category,
     ...priceFilter,
   };
-
-  console.log("req.query:", query);
-  console.log("finalQuery:", finalQuery);
 
   const totalProducts = await Product.countDocuments();
   const filteredProductsCount = await Product.countDocuments(finalQuery);

@@ -7,22 +7,24 @@ function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState("");
   const [error, setError] = useState("");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
 
   async function loadProducts() {
     try {
       setLoading(true);
       setError("");
 
-      const data = await getProducts({
-        limit: 100,
-      });
+      const data = await getProducts({ page });
+      const totalProduct = data.totalProducts;
+      setTotalPages(Math.ceil(totalProduct / 8));
 
       setProducts(data.products || []);
     } catch (error) {
       setError(
         error.response?.data?.message ||
           error.message ||
-          "Failed to load products"
+          "Failed to load products",
       );
     } finally {
       setLoading(false);
@@ -31,11 +33,11 @@ function AdminProductsPage() {
 
   useEffect(() => {
     loadProducts();
-  }, []);
+  }, [page]);
 
   async function handleDelete(productId) {
     const confirmDelete = window.confirm(
-      "Are you sure you want to delete this product?"
+      "Are you sure you want to delete this product?",
     );
 
     if (!confirmDelete) return;
@@ -46,17 +48,25 @@ function AdminProductsPage() {
       await deleteProduct(productId);
 
       setProducts((prevProducts) =>
-        prevProducts.filter((product) => product._id !== productId)
+        prevProducts.filter((product) => product._id !== productId),
       );
     } catch (error) {
       setError(
         error.response?.data?.message ||
           error.message ||
-          "Failed to delete product"
+          "Failed to delete product",
       );
     } finally {
       setDeletingId("");
     }
+  }
+
+  function goToPreviousPage() {
+    setPage((prev) => Math.max(1, prev - 1));
+  }
+
+  function goToNextPage() {
+    setPage((prev) => Math.min(totalPages, prev + 1));
   }
 
   if (loading) {
@@ -155,6 +165,20 @@ function AdminProductsPage() {
               })}
             </tbody>
           </table>
+          <div className="pagination">
+            <button onClick={goToPreviousPage} disabled={page === 1}>
+              Previous
+            </button>
+
+            <span>
+              Page {page} of {totalPages}
+            </span>
+
+            <button onClick={goToNextPage} disabled={page === totalPages}>
+              Next
+            </button>
+          </div>
+          <p>{tp}</p>
         </section>
       )}
     </main>
