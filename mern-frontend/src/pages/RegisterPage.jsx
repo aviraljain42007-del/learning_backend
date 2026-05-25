@@ -74,7 +74,7 @@ function RegisterPage() {
     <main className="auth-page">
       <section className="auth-card">
         <h1>Register</h1>
-        <p className="auth-subtitle">Create your MyShop account</p>
+        <p className="auth-subtitle">Create your MARKIT account</p>
 
         <form onSubmit={handleSubmit} className="auth-form">
           <div className="form-group">

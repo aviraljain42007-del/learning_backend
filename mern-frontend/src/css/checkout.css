@@ -1,0 +1,108 @@
+/* MARKIT — Checkout Page (Dark Theme) */
+
+.checkout-page {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: var(--space-6);
+}
+
+.checkout-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-5);
+  align-items: start;
+}
+
+.checkout-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+}
+
+.checkout-card h2 {
+  margin-top: 0;
+  margin-bottom: var(--space-5);
+  color: var(--neutral-900);
+  font-size: var(--font-xl);
+}
+
+.payment-options {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin: var(--space-3) 0 var(--space-5);
+}
+
+.payment-options label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 1.5px solid var(--border-default);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  font-size: var(--font-sm);
+  font-weight: var(--weight-medium);
+  color: var(--neutral-700);
+}
+
+.payment-options label:hover {
+  border-color: rgba(249,115,22,0.3);
+  background: rgba(249,115,22,0.05);
+}
+
+.payment-options input[type="radio"] {
+  accent-color: var(--primary-500);
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Checkout Summary ── */
+.checkout-summary {
+  background: var(--bg-card);
+  border: 1px solid var(--border-light);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6);
+  position: sticky;
+  top: calc(var(--navbar-height) + var(--space-4));
+  box-shadow: var(--shadow-lg);
+}
+
+.checkout-summary h2 {
+  margin-top: 0;
+  margin-bottom: var(--space-4);
+  color: var(--neutral-900);
+  font-size: var(--font-xl);
+}
+
+.checkout-items {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.checkout-item {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--font-sm);
+  color: var(--neutral-500);
+}
+
+.checkout-item strong { color: var(--neutral-800); }
+
+.mobile-place-order-btn { display: none; }
+
+@media (max-width: 768px) {
+  .checkout-page { padding: var(--space-4); }
+  .checkout-layout { grid-template-columns: 1fr; }
+  .checkout-summary { position: static; }
+  .checkout-summary .checkout-btn { display: none; }
+  .mobile-place-order-btn { display: block; }
+}

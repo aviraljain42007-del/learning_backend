@@ -1,0 +1,259 @@
+/* MARKIT — Navbar (Dark Theme) */
+
+.navbar {
+  height: var(--navbar-height);
+  padding: 0 var(--space-4);
+  background: rgba(14, 14, 22, 0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+  box-shadow: 0 1px 12px rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+/* ── Logo ── */
+.logo-link {
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.logo-link:hover { opacity: 0.85; }
+
+.logo-img {
+  height: 60px;
+  width: auto;
+  object-fit: contain;
+  filter: drop-shadow(0 0 8px rgba(249,115,22,0.35));
+  animation: floatLogo 4s ease-in-out infinite;
+}
+
+/* ── Slogan ── */
+.nav-slogan {
+  position: absolute;
+  left: 35%;
+  transform: translateX(-50%);
+  font-size: var(--font-lg);
+  font-weight: var(--weight-medium);
+  color: var(--neutral-400);
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.slogan-highlight {
+  font-weight: var(--weight-black);
+  background: linear-gradient(135deg, var(--primary-400), #e8590c);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 8px rgba(249,115,22,0.3));
+}
+
+/* ── Nav Links Container ── */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+/* ── Each Nav Link ── */
+.nav-links a {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--neutral-500);
+  text-decoration: none;
+  padding: 7px 14px;
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-medium);
+  font-size: var(--font-sm);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.nav-links a svg {
+  flex-shrink: 0;
+  opacity: 0.6;
+  transition: opacity var(--transition-fast);
+}
+
+.nav-links a:hover {
+  color: var(--primary-500);
+  background-color: rgba(249,115,22,0.08);
+}
+
+.nav-links a:hover svg {
+  opacity: 1;
+}
+
+.nav-links a.active {
+  color: var(--primary-500);
+  background-color: rgba(249,115,22,0.1);
+  font-weight: var(--weight-semibold);
+}
+
+.nav-links a.active svg {
+  opacity: 1;
+}
+
+.nav-links a.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 16px;
+  height: 2.5px;
+  background: var(--primary-500);
+  border-radius: var(--radius-full);
+  box-shadow: 0 0 8px rgba(249,115,22,0.4);
+}
+
+/* ── Divider between sections ── */
+.nav-divider {
+  width: 1px;
+  height: 20px;
+  background: var(--neutral-300);
+  margin: 0 var(--space-2);
+  flex-shrink: 0;
+}
+
+/* ── User badge ── */
+.nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: var(--weight-semibold);
+  color: var(--accent-500);
+  font-size: var(--font-sm);
+  padding: 5px 12px;
+  background-color: rgba(34,211,238,0.08);
+  border: 1px solid rgba(34,211,238,0.15);
+  border-radius: var(--radius-full);
+  white-space: nowrap;
+}
+
+.nav-user svg {
+  opacity: 0.8;
+}
+
+/* ── Login link ── */
+.nav-login-link.nav-login-link {
+  color: var(--primary-500);
+  font-weight: var(--weight-semibold);
+}
+
+.nav-login-link.nav-login-link:hover {
+  background-color: rgba(249,115,22,0.1);
+}
+
+/* ── Register link ── */
+.nav-register-link.nav-register-link {
+  background: linear-gradient(135deg, var(--primary-500), #e8590c);
+  color: white;
+  font-weight: var(--weight-semibold);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2px 8px rgba(249,115,22,0.3);
+  padding: 7px 16px;
+}
+
+.nav-register-link.nav-register-link:hover {
+  background: linear-gradient(135deg, #fb923c, var(--primary-500));
+  box-shadow: 0 4px 16px rgba(249,115,22,0.4);
+  transform: translateY(-1px);
+  color: white;
+}
+
+.nav-register-link.nav-register-link.active {
+  background: linear-gradient(135deg, #fb923c, var(--primary-500));
+  color: white;
+}
+
+.nav-register-link.nav-register-link.active::after {
+  display: none;
+}
+
+/* ── Logout button ── */
+.logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--neutral-600);
+  padding: 6px 14px;
+  border-radius: var(--radius-md);
+  font-weight: var(--weight-semibold);
+  font-size: var(--font-sm);
+  transition: all var(--transition-fast);
+  white-space: nowrap;
+}
+
+.logout-btn:hover {
+  background: rgba(239,68,68,0.1);
+  border-color: rgba(239,68,68,0.25);
+  color: var(--danger);
+  transform: translateY(-1px);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 var(--space-3);
+    height: 56px;
+  }
+
+  .nav-slogan {
+    display: none;
+  }
+
+  .logo-img {
+    height: 28px;
+  }
+
+  .nav-links {
+    gap: 2px;
+  }
+
+  .nav-links a {
+    padding: 5px 8px;
+    font-size: var(--font-xs);
+    gap: 4px;
+  }
+
+  .nav-links a span {
+    display: none;
+  }
+
+  .nav-user {
+    font-size: var(--font-xs);
+    padding: 4px 8px;
+    gap: 3px;
+  }
+
+  .logout-btn {
+    padding: 5px 10px;
+    font-size: var(--font-xs);
+    gap: 3px;
+  }
+
+  .logout-btn span {
+    display: none;
+  }
+
+  .nav-divider {
+    height: 16px;
+    margin: 0 var(--space-1);
+  }
+
+  .nav-register-link.nav-register-link {
+    padding: 5px 10px;
+  }
+}

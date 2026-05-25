@@ -152,6 +152,7 @@ function ProductsPage() {
         <p>
           Showing {products.length} of {filteredProductsCount} matched products
         </p>
+
       </div>
 
       <form className="filters-bar" onSubmit={handleApplyFilters}>
@@ -176,6 +177,21 @@ function ProductsPage() {
           <option value="shoes">Shoes</option>
           <option value="accessories">Accessories</option>
           <option value="clothing">Clothing</option>
+          <option value="watch">Watch</option>
+          <option value="headphones">Headphones</option>
+          <option value="camera">Camera</option>
+          <option value="gaming">Gaming</option>
+          <option value="home">Home</option>
+          <option value="books">Books</option>
+          <option value="sports">Sports</option>
+          <option value="beauty">Beauty</option>
+          <option value="furniture">Furniture</option>
+          <option value="bags">Bags</option>
+          <option value="tablet">Tablet</option>
+          <option value="tv">TV</option>
+          <option value="kitchen">Kitchen</option>
+          <option value="toys">Toys</option>
+          <option value="fitness">Fitness</option>
         </select>
 
         <input
