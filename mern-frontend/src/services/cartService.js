@@ -14,6 +14,7 @@ export async function addToCart(productId, quantity = 1) {
   return response.data;
 }
 export async function updateCartItem(productId, quantity) {
+  console.log(productId)
   const response = await api.put(`/cart/${productId}`, {
     quantity,
   });
@@ -23,10 +24,5 @@ export async function updateCartItem(productId, quantity) {
 
 export async function removeCartItem(productId) {
   const response = await api.delete(`/cart/${productId}`);
-  return response.data;
-}
-
-export async function clearCart() {
-  const response = await api.delete("/cart");
   return response.data;
 }

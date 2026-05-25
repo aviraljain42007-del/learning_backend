@@ -124,7 +124,7 @@ class UserService {
     }
 
     const product = await Product.findById(productId)
-
+   
     if(quantity > product.stock){
       throw new ApiError(400, "Quantity cannot be greater than the stock")
     }

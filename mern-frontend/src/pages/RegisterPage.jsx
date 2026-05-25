@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { registerUserThunk } from "../redux/slices/authSlice";
+import { loginUserThunk, registerUserThunk } from "../redux/slices/authSlice";
 
 function RegisterPage() {
   const navigate = useNavigate();
@@ -56,11 +56,17 @@ function RegisterPage() {
       role: formData.role,
     };
 
+    const loginPayload = {
+      email: formData.email,
+      password: formData.password
+    }
+    
     try {
       setLoading(true);
       setError("");
 
       await dispatch(registerUserThunk(registerPayload)).unwrap();
+      await dispatch(loginUserThunk(loginPayload)).unwrap()
 
       navigate("/");
     } catch (error) {

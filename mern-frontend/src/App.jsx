@@ -2,7 +2,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 
-import MainLayout from "./components/MainLayout";
+import {MainLayout} from "./components/MainLayout";
 import ProductsPage from "./pages/ProductsPage";
 
 import ProtectedRoute from "./routes/ProtectedRoute";

@@ -178,7 +178,7 @@ function AdminProductsPage() {
               Next
             </button>
           </div>
-          <p>{tp}</p>
+          
         </section>
       )}
     </main>

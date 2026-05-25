@@ -9,8 +9,8 @@ router.get("/user" ,checkuser , getuser)
 router.post("/login" , login)
 router.post("/cart" , checkuser , addToCart)
 router.get("/cart" , checkuser, getMyCart)
-router.put("/cart/:productId" , checkuser , updateCartQuantity)
-router.delete("/cart/:productId" , checkuser , removeFromCart)
+router.put("/cart/:id" , checkuser , updateCartQuantity)
+router.delete("/cart/:id" , checkuser , removeFromCart)
 
 
 

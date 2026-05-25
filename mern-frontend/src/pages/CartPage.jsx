@@ -30,16 +30,17 @@ function CartPage() {
   }, [dispatch]);
 
   function getProductFromItem(item) {
-    return item.product || item.productId;
+    return item.product;
   }
 
   async function handleIncrease(item) {
     const product = getProductFromItem(item);
+    
 
     if (!product) return;
 
     const currentQuantity = item.quantity;
-    const stock = product.stock || 1;
+    const stock = product.stock;
 
     if (currentQuantity >= stock) return;
 

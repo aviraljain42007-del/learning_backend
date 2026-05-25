@@ -2,7 +2,6 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
 import {
   addToCart,
-  clearCart,
   getCart,
   removeCartItem,
   updateCartItem,
@@ -38,16 +37,6 @@ function getProductFromItem(item) {
   return item.product || item.productId;
 }
 
-function getProductIdFromItem(item) {
-  const product = getProductFromItem(item);
-
-  if (!product) return "";
-
-  if (typeof product === "string") return product;
-
-  return product._id || "";
-}
-
 /*
   Load cart from backend
 */
@@ -57,7 +46,7 @@ export const fetchCartThunk = createAsyncThunk(
     try {
       const data = await getCart();
 
-      return extractCartItems(data);
+      return data.cart;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -70,6 +59,7 @@ export const fetchCartThunk = createAsyncThunk(
 
 /*
   Add to cart
+
   Important:
   POST /cart ke baad hum fresh GET /cart kar rahe hain
   so Redux state backend ke latest cart se sync ho jaaye.
@@ -82,7 +72,7 @@ export const addToCartThunk = createAsyncThunk(
 
       const cartData = await getCart();
 
-      return extractCartItems(cartData);
+      return cartData.cart;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -95,17 +85,19 @@ export const addToCartThunk = createAsyncThunk(
 
 /*
   Update cart item quantity
+
   Update ke baad bhi fresh cart fetch kar rahe hain.
 */
 export const updateCartItemThunk = createAsyncThunk(
   "cart/updateCartItem",
   async ({ productId, quantity }, { rejectWithValue }) => {
     try {
+      
       await updateCartItem(productId, quantity);
 
       const cartData = await getCart();
 
-      return extractCartItems(cartData);
+      return cartData.cart;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
@@ -118,6 +110,7 @@ export const updateCartItemThunk = createAsyncThunk(
 
 /*
   Remove item
+
   Remove ke baad fresh cart fetch.
 */
 export const removeCartItemThunk = createAsyncThunk(
@@ -134,26 +127,6 @@ export const removeCartItemThunk = createAsyncThunk(
         error.response?.data?.message ||
           error.message ||
           "Failed to remove item"
-      );
-    }
-  }
-);
-
-/*
-  Clear cart
-*/
-export const clearCartThunk = createAsyncThunk(
-  "cart/clearCart",
-  async (_, { rejectWithValue }) => {
-    try {
-      await clearCart();
-
-      return true;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to clear cart"
       );
     }
   }
@@ -256,23 +229,6 @@ const cartSlice = createSlice({
       .addCase(removeCartItemThunk.rejected, (state, action) => {
         state.error = action.payload || "Failed to remove item";
         state.updatingItemId = "";
-      })
-
-      /*
-        Clear cart
-      */
-      .addCase(clearCartThunk.pending, (state) => {
-        state.error = "";
-        state.message = "";
-      })
-      .addCase(clearCartThunk.fulfilled, (state) => {
-        state.cartItems = [];
-        state.message = "";
-        state.error = "";
-        state.updatingItemId = "";
-      })
-      .addCase(clearCartThunk.rejected, (state, action) => {
-        state.error = action.payload || "Failed to clear cart";
       });
   },
 });
