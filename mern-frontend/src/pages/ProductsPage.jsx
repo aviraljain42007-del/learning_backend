@@ -29,7 +29,7 @@ function ProductsPage() {
   const limit = 8;
   const totalPages = Math.max(1, Math.ceil(filteredProductsCount / limit));
 
-  async function loadProducts(filters = activeFilters, currentPage = page) {
+  async function loadProducts(filters = activeFiltersz, currentPage = page) {
     try {
       setLoading(true);
       setError("");

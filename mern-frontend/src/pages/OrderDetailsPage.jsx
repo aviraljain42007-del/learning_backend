@@ -19,11 +19,7 @@ function OrderDetailsPage() {
 
       setOrder(data.order);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load order"
-      );
+      setError(error.message ||"Failed to load order");
     } finally {
       setLoading(false);
     }

@@ -116,10 +116,6 @@ class OrderService {
   // Update order status
   async updateOrderStatus(orderId, orderStatus) {
     
-    if (orderStatus === "Delivered") {
-      updateData.deliveredAt = new Date();
-    }
-
     const order = await Order.findByIdAndUpdate(orderId, {orderStatus}, {
       new: true,
       runValidators: true,
@@ -156,7 +152,7 @@ class OrderService {
 
   // Get all orders (admin)
   async getAllOrders() {
-    const orders = await Order.find().sort({ createdAt: -1 }).lean();
+    const orders = await Order.find().sort({ createdAt: -1 }).populate("user" , "name").lean();
     return orders;
   }
 

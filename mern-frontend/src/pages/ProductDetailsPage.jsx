@@ -45,11 +45,7 @@ function ProductDetailsPage() {
       setProduct(data.product || null);
       setQuantity(1);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load product"
-      );
+      setError(error.message || "Failed to load product");
     } finally {
       setLoading(false);
     }
@@ -182,11 +178,7 @@ function ProductDetailsPage() {
     );
   }
 
-  const imageUrl =
-    product.image?.url ||
-    product.image ||
-    "https://via.placeholder.com/500x400?text=Product";
-
+  const imageUrl = product.image.url
   const reviews = product.reviews || [];
 
   return (

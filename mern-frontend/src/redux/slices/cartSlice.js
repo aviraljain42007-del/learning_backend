@@ -48,11 +48,7 @@ export const fetchCartThunk = createAsyncThunk(
 
       return data.cart;
     } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load cart"
-      );
+      return rejectWithValue( error.message || "Failed to load cart");
     }
   }
 );
@@ -134,7 +130,7 @@ export const removeCartItemThunk = createAsyncThunk(
 
 const initialState = {
   cartItems: [],
-  loading: false,
+  loading: true,
   error: "",
   message: "",
   updatingItemId: "",

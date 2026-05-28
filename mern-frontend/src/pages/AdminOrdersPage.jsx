@@ -24,14 +24,14 @@ function AdminOrdersPage() {
 
       const data = await getAllOrders();
 
-      setOrders(data.orders || data.allOrders || []);
-    } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load orders"
-      );
-    } finally {
+      setOrders(data.orders);
+    } 
+    
+    catch (error) {
+      setError( error.message || "Failed to load orders");
+    } 
+    
+    finally {
       setLoading(false);
     }
   }
@@ -55,9 +55,7 @@ function AdminOrdersPage() {
           order._id === orderId
             ? {
                 ...order,
-                ...(updatedOrder || {}),
-                orderStatus: updatedOrder?.orderStatus || newStatus,
-                status: updatedOrder?.status || newStatus,
+                orderStatus : updatedOrder.orderStatus
               }
             : order
         )
@@ -72,6 +70,9 @@ function AdminOrdersPage() {
       );
     } finally {
       setUpdatingOrderId("");
+      setTimeout(() => {
+        setMessage("")
+      }, 1000);
     }
   }
 
@@ -102,6 +103,9 @@ function AdminOrdersPage() {
       );
     } finally {
       setDeletingOrderId("");
+      setTimeout(() => {
+       setMessage("")
+      }, 1000);
     }
   }
 
@@ -146,39 +150,25 @@ function AdminOrdersPage() {
                   ? new Date(order.createdAt).toLocaleDateString()
                   : "N/A";
 
-                const userName =
-                  order.user?.name ||
-                  order.user?.email ||
-                  order.userName ||
-                  "User";
-
-                const total =
-                  order.totalPrice ||
-                  order.totalAmount ||
-                  order.amount ||
-                  0;
-
-                const status =
-                  order.orderStatus || order.status || "Processing";
-
                 const isUpdating = updatingOrderId === order._id;
+                
                 const isDeleting = deletingOrderId === order._id;
 
                 return (
                   <tr key={order._id}>
                     <td>{order._id}</td>
 
-                    <td>{userName}</td>
+                    <td>{order.user.name }</td>
 
                     <td>{orderDate}</td>
 
-                    <td>₹{total}</td>
+                    <td>₹{ order.totalPrice}</td>
 
-                    <td>{order.paymentMethod || "N/A"}</td>
+                    <td>{order.paymentInfo.method}</td>
 
                     <td>
                       <select
-                        value={status}
+                        value={order.orderStatus}
                         onChange={(event) =>
                           handleStatusChange(order._id, event.target.value)
                         }

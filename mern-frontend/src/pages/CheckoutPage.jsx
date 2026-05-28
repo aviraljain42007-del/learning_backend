@@ -105,23 +105,14 @@ function CheckoutPage() {
 
       dispatch(resetCartState());
 
-      const orderId =
-        data.order?._id ||
-        data.newOrder?._id ||
-        data.createdOrder?._id ||
-        data.orderId;
-
+      const orderId = data.order._id
       if (orderId) {
         navigate(`/orders/${orderId}`);
       } else {
         navigate("/orders");
       }
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to place order"
-      );
+      setError(error.message ||"Failed to place order");
     } finally {
       setPlacingOrder(false);
     }

@@ -1,8 +1,3 @@
-/* ============================================
-   MARKIT — Master Stylesheet
-   "mark it, get it"
-   ============================================ */
-
 @import './css/variables.css';
 @import './css/base.css';
 @import './css/navbar.css';

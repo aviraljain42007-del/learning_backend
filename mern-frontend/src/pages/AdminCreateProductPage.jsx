@@ -22,7 +22,7 @@ function AdminCreateProductPage() {
 
   function handleChange(event) {
     const { name, value } = event.target;
-
+    console.log(value)
     setFormData((prev) => ({
       ...prev,
       [name]: value,
@@ -38,6 +38,7 @@ function AdminCreateProductPage() {
 
     setImage(file);
     setImagePreview(URL.createObjectURL(file));
+    
   }
 
   function validateForm() {
@@ -48,7 +49,7 @@ function AdminCreateProductPage() {
       !formData.category ||
       !formData.stock
     ) {
-      return "Name, description, price, category and stock are required";
+      return "All fields are required";
     }
 
 

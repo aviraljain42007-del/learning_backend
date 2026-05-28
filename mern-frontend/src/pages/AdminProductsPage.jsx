@@ -19,13 +19,9 @@ function AdminProductsPage() {
       const totalProduct = data.totalProducts;
       setTotalPages(Math.ceil(totalProduct / 8));
 
-      setProducts(data.products || []);
+      setProducts(data.products);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load products",
-      );
+      setError(error.message || "Failed to load products");
     } finally {
       setLoading(false);
     }
@@ -51,11 +47,7 @@ function AdminProductsPage() {
         prevProducts.filter((product) => product._id !== productId),
       );
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to delete product",
-      );
+      setError(error.message || "Failed to delete product");
     } finally {
       setDeletingId("");
     }
@@ -77,111 +69,105 @@ function AdminProductsPage() {
     );
   }
 
-  if (error) {
-    return (
-      <main className="page-container">
-        <p className="error-text">{error}</p>
-
-        <button className="retry-btn" onClick={loadProducts}>
-          Try Again
-        </button>
-      </main>
-    );
-  }
-
   return (
-    <main className="admin-page">
-      <div className="admin-header">
-        <div>
-          <h1>Admin Products</h1>
-          <p>Manage store products</p>
+    <>
+      {error && (
+        <main className="page-container">
+          <p className="error-text">{error}</p>
+
+          <button className="retry-btn" onClick={loadProducts}>
+            Try Again
+          </button>
+        </main>
+      )}
+
+      <main className="admin-page">
+        <div className="admin-header">
+          <div>
+            <h1>Admin Products</h1>
+            <p>Manage store products</p>
+          </div>
+
+          <Link to="/admin/products/create" className="admin-primary-link">
+            Create Product
+          </Link>
         </div>
 
-        <Link to="/admin/products/create" className="admin-primary-link">
-          Create Product
-        </Link>
-      </div>
+        {products.length === 0 ? (
+          <p className="status-text">No products found.</p>
+        ) : (
+          <section className="admin-table-wrapper">
+            <table className="admin-table">
+              <thead>
+                <tr>
+                  <th>Image</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
 
-      {products.length === 0 ? (
-        <p className="status-text">No products found.</p>
-      ) : (
-        <section className="admin-table-wrapper">
-          <table className="admin-table">
-            <thead>
-              <tr>
-                <th>Image</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Stock</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
+              <tbody>
+                {products.map((product) => {
+                  return (
+                    <tr key={product._id}>
+                      <td>
+                        <img
+                          src={product.image.url}
+                          alt={product.name}
+                          className="admin-product-image"
+                        />
+                      </td>
 
-            <tbody>
-              {products.map((product) => {
-                const imageUrl =
-                  product.image?.url ||
-                  product.image ||
-                  "https://via.placeholder.com/80x60?text=Product";
+                      <td>{product.name}</td>
+                      <td>{product.category}</td>
+                      <td>₹{product.price}</td>
+                      <td>{product.stock}</td>
 
-                return (
-                  <tr key={product._id}>
-                    <td>
-                      <img
-                        src={imageUrl}
-                        alt={product.name}
-                        className="admin-product-image"
-                      />
-                    </td>
+                      <td>
+                        <div className="admin-actions">
+                          <Link
+                            to={`/admin/products/edit/${product._id}`}
+                            className="edit-link"
+                          >
+                            Edit
+                          </Link>
 
-                    <td>{product.name}</td>
-                    <td>{product.category}</td>
-                    <td>₹{product.price}</td>
-                    <td>{product.stock}</td>
+                          <button
+                            className="delete-btn"
+                            onClick={() => handleDelete(product._id)}
+                            disabled={deletingId === product._id}
+                          >
+                            {deletingId === product._id
+                              ? "Deleting..."
+                              : "Delete"}
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+            <div className="pagination">
+              <button onClick={goToPreviousPage} disabled={page === 1}>
+                Previous
+              </button>
 
-                    <td>
-                      <div className="admin-actions">
-                        <Link
-                          to={`/admin/products/edit/${product._id}`}
-                          className="edit-link"
-                        >
-                          Edit
-                        </Link>
+              <span>
+                Page {page} of {totalPages}
+              </span>
 
-                        <button
-                          className="delete-btn"
-                          onClick={() => handleDelete(product._id)}
-                          disabled={deletingId === product._id}
-                        >
-                          {deletingId === product._id
-                            ? "Deleting..."
-                            : "Delete"}
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <div className="pagination">
-            <button onClick={goToPreviousPage} disabled={page === 1}>
-              Previous
-            </button>
-
-            <span>
-              Page {page} of {totalPages}
-            </span>
-
-            <button onClick={goToNextPage} disabled={page === totalPages}>
-              Next
-            </button>
-          </div>
-          
-        </section>
-      )}
-    </main>
+              <button onClick={goToNextPage} disabled={page === totalPages}>
+                Next
+              </button>
+            </div>
+          </section>
+        )}
+      </main>
+    </>
   );
 }
 

@@ -47,13 +47,9 @@ function AdminUpdateProductPage() {
         discount: product.discount || "",
       });
 
-      setImagePreview(product.image?.url || product.image || "");
+      setImagePreview(product.image?.url);
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to load product"
-      );
+      setError(error.message || "Failed to load product");
     } finally {
       setLoading(false);
     }
@@ -107,11 +103,7 @@ function AdminUpdateProductPage() {
       console.log(updated.product)
       navigate("/admin/products");
     } catch (error) {
-      setError(
-        error.response?.data?.message ||
-          error.message ||
-          "Failed to update product"
-      );
+      setError(error.message ||"Failed to update product");
     } finally {
       setUpdating(false);
     }

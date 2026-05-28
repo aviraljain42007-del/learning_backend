@@ -27,7 +27,7 @@ function CartPage() {
 
   useEffect(() => {
     dispatch(fetchCartThunk());
-  }, [dispatch]);
+  }, []);
 
   function getProductFromItem(item) {
     return item.product;
@@ -121,10 +121,7 @@ function CartPage() {
 
             if (!product) return null;
 
-            const imageUrl =
-              product.image?.url ||
-              product.image ||
-              "https://via.placeholder.com/120x100?text=Product";
+            const imageUrl = product.image.url
 
             const isUpdating = updatingItemId === product._id;
 
