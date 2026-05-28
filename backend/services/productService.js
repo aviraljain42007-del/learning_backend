@@ -52,15 +52,15 @@ class ProductService {
 
   // Get products with filters and pagination
   async getProducts(query, page, limit) {
-  // const cacheKey = `products:${JSON.stringify(query)}:page${page}:limit${limit}`;
-  // try {
-  //   const cachedResult = await redisClient.get(cacheKey);
-  //   if (cachedResult) {
-  //     return JSON.parse(cachedResult);
-  //   }
-  // } catch (err) {
-  //   console.error("Redis get error:", err);
-  // }
+  const cacheKey = `products:${JSON.stringify(query)}:page${page}:limit${limit}`;
+  try {
+    const cachedResult = await redisClient.get(cacheKey);
+    if (cachedResult) {
+      return JSON.parse(cachedResult);
+    }
+  } catch (err) {
+    console.error("Redis get error:", err);
+  }
 
   const keyword = query.keyword
     ? { $text: { $search: query.keyword } }
@@ -125,37 +125,37 @@ class ProductService {
     products,
   };
 
-  // try {
-    //   // Cache for 1 hour (3600 seconds)
-    //   await redisClient.setEx(cacheKey, 60 , JSON.stringify(result));
-    // } catch (err) {
-    //   console.error("Redis set error:", err);
-    // }
+  try {
+      // Cache for 1 hour (60 seconds)
+      await redisClient.setEx(cacheKey, 60 , JSON.stringify(result));
+    } catch (err) {
+      console.error("Redis set error:", err);
+    }
 
   return result;
 }
   // Get single product by ID
   async getSingleProduct(productId) {
-    // const cacheKey = `product:${productId}`;
-    // try {
-    //   const cachedProduct = await redisClient.get(cacheKey);
-    //   if (cachedProduct) {
-    //     return JSON.parse(cachedProduct);
-    //   }
-    // } catch (err) {
-    //   console.error("Redis get error:", err);
-    // }
+    const cacheKey = `product:${productId}`;
+    try {
+      const cachedProduct = await redisClient.get(cacheKey);
+      if (cachedProduct) {
+        return JSON.parse(cachedProduct);
+      }
+    } catch (err) {
+      console.error("Redis get error:", err);
+    }
 
     const product = await Product.findById(productId).lean();
     if (!product) {
       throw new ApiError(404, "Product not found");
     }
 
-    // try {
-    //   await redisClient.setEx(cacheKey, 3600, JSON.stringify(product));
-    // } catch (err) {
-    //   console.error("Redis set error:", err);
-    // }
+    try {
+      await redisClient.setEx(cacheKey, 3600, JSON.stringify(product));
+    } catch (err) {
+      console.error("Redis set error:", err);
+    }
 
     return product;
   }

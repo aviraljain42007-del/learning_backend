@@ -6,7 +6,7 @@ const connectdb = require("./config/db")
 const redisClient = require("./config/redis")
 
 
-//redisClient.connect().catch(console.error)
+redisClient.connect().catch(console.error)
 const PORT = process.env.PORT
 
 const startserver = async () =>{
