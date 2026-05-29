@@ -35,7 +35,7 @@ class UserService {
       throw new ApiError(400, "Fill all details");
     }
 
-    const user = await User.findOne({ email }).lean();
+    const user = await User.findOne({ email }).select("+password +refreshToken").lean();
     if (!user) {
       throw new ApiError(401, "Wrong email or password");
     }

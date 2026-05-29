@@ -19,3 +19,10 @@ export async function getCurrentUser() {
   const response = await api.get("/user");
   return response.data;
 }
+
+
+export const googleLogin = async (credential) => {
+  const response = await api.post("/api/advanced-auth/google-login",{ credential });
+
+  return response.data;
+};

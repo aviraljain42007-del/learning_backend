@@ -1,9 +1,23 @@
 const orderService = require("../services/orderService");
 const asyncHandler = require("../utils/asynchandler");
+const sendEmail = require("../utils/sendEmail");
+const { orderConfirmationTemplate } = require("../utils/emailTemplate");
 
 exports.createOrder = asyncHandler(async (req, res) => {
   const { shippingAddress } = req.body;
+
   const order = await orderService.createOrder(req.user._id, shippingAddress);
+
+  const emailContent = orderConfirmationTemplate(order, req.user);
+
+  sendEmail({
+    to: req.user.email,
+    subject: emailContent.subject,
+    text: emailContent.text,
+    html: emailContent.html,
+  }).catch((error) => {
+    console.error("Order confirmation email failed:", error.message);
+  });
 
   res.status(201).json({
     success: true,

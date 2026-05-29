@@ -39,7 +39,7 @@ exports.checkuser = async (req, res, next) => {
 
         try {
           const decodedRefresh = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
-          const user = await User.findById(decodedRefresh.id).select("-password").lean();
+          const user = await User.findById(decodedRefresh.id).select("+refreshToken").lean();
 
           if (!user || user.refreshToken !== refreshToken) {
             return res.status(401).json({

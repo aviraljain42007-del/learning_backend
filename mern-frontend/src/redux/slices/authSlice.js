@@ -5,6 +5,7 @@ import {
   loginUser,
   logoutUser,
   registerUser,
+  googleLogin,
 } from "../../services/authService";
 
 export const loadCurrentUserThunk = createAsyncThunk(
@@ -12,15 +13,15 @@ export const loadCurrentUserThunk = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       const data = await getCurrentUser();
-      return data.user
+      return data.user;
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
           error.message ||
-          "Failed to load current user"
+          "Failed to load current user",
       );
     }
-  }
+  },
 );
 
 export const loginUserThunk = createAsyncThunk(
@@ -37,12 +38,30 @@ export const loginUserThunk = createAsyncThunk(
       return currentUserData.user || null;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Login failed"
+        error.response?.data?.message || error.message || "Login failed",
       );
     }
-  }
+  },
+);
+
+export const googleLoginThunk = createAsyncThunk(
+  "auth/googleLogin",
+  async ({ credential }, { rejectWithValue }) => {
+    try {
+      const data = await googleLogin(credential);
+
+      if (data.user) {
+        return data.user;
+      }
+
+      const currentUserData = await getCurrentUser();
+      return currentUserData.user || null;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Google login failed",
+      );
+    }
+  },
 );
 
 export const registerUserThunk = createAsyncThunk(
@@ -59,12 +78,10 @@ export const registerUserThunk = createAsyncThunk(
       return currentUserData.user || null;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Registration failed"
+        error.response?.data?.message || error.message || "Registration failed",
       );
     }
-  }
+  },
 );
 
 export const logoutUserThunk = createAsyncThunk(
@@ -75,12 +92,10 @@ export const logoutUserThunk = createAsyncThunk(
       return null;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message ||
-          error.message ||
-          "Logout failed"
+        error.response?.data?.message || error.message || "Logout failed",
       );
     }
-  }
+  },
 );
 
 const initialState = {
@@ -134,6 +149,17 @@ const authSlice = createSlice({
       .addCase(registerUserThunk.rejected, (state, action) => {
         state.user = null;
         state.authError = action.payload || "Registration failed";
+      })
+      .addCase(googleLoginThunk.pending, (state) => {
+        state.authError = "";
+      })
+      .addCase(googleLoginThunk.fulfilled, (state, action) => {
+        state.user = action.payload;
+        state.authError = "";
+      })
+      .addCase(googleLoginThunk.rejected, (state, action) => {
+        state.user = null;
+        state.authError = action.payload || "Google login failed";
       })
 
       .addCase(logoutUserThunk.fulfilled, (state) => {
