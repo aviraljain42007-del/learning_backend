@@ -2,8 +2,7 @@ import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 
-import { loginUserThunk, googleLoginThunk } from "../redux/slices/authSlice";
-import GoogleLoginButton from "../components/GoogleLoginButton";
+import { loginUserThunk } from "../redux/slices/authSlice";
 
 function LoginPage() {
   const navigate = useNavigate();
@@ -30,27 +29,6 @@ function LoginPage() {
 
     setError("");
   }
-  async function handleGoogleSuccess(credentialResponse) {
-    try {
-      setLoading(true);
-      setError("");
-
-      const credential = credentialResponse.credential;
-
-      if (!credential) {
-        setError("Google credential not found");
-        return;
-      }
-
-      await dispatch(googleLoginThunk({ credential })).unwrap();
-
-      navigate(redirectPath);
-    } catch (error) {
-      setError(error || "Google login failed");
-    } finally {
-      setLoading(false);
-    }
-  }
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -72,18 +50,6 @@ function LoginPage() {
     } finally {
       setLoading(false);
     }
-  }
-
-  function handleGoogleSuccess(credentialResponse) {
-    console.log("Google credential response:", credentialResponse);
-    console.log("Google credential:", credentialResponse.credential);
-
-    // Abhi sirf UI + credential check kar rahe hain.
-    // Redux thunk next step mein banayenge.
-  }
-
-  function handleGoogleError() {
-    setError("Google login failed");
   }
 
   return (
@@ -121,17 +87,6 @@ function LoginPage() {
             {loading ? "Logging in..." : "Login"}
           </button>
         </form>
-
-        <div className="auth-divider">
-          <span>or</span>
-        </div>
-
-        <div className="google-login-wrapper">
-          <GoogleLoginButton
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-          />
-        </div>
 
         <p className="auth-switch">
           New user? <Link to="/register">Create account</Link>

@@ -8,7 +8,7 @@ const urlroutes = require("./routes/urlroutes")
 const errorMiddleware = require("./middleware/errorMiddleware")
 const mongoSanitize = require("express-mongo-sanitize")
 const rateLimit = require("./middleware/rateLimiter")
-const advancedAuthRoutes = require("./routes/advancedAuthRoutes")
+
 
 const app = express()
 
@@ -27,7 +27,7 @@ app.use("/api" , userroutes)
 app.use("/api", productroutes)
 app.use("/api", orderroutes)
 app.use("/api", urlroutes)
-app.use("/api/advanced-auth", advancedAuthRoutes);
+
 
 app.get("/" , (req , res) =>{
     res.send("api running")

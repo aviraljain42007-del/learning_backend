@@ -5,7 +5,6 @@ import {
   loginUser,
   logoutUser,
   registerUser,
-  googleLogin,
 } from "../../services/authService";
 
 export const loadCurrentUserThunk = createAsyncThunk(
@@ -44,25 +43,7 @@ export const loginUserThunk = createAsyncThunk(
   },
 );
 
-export const googleLoginThunk = createAsyncThunk(
-  "auth/googleLogin",
-  async ({ credential }, { rejectWithValue }) => {
-    try {
-      const data = await googleLogin(credential);
 
-      if (data.user) {
-        return data.user;
-      }
-
-      const currentUserData = await getCurrentUser();
-      return currentUserData.user || null;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data?.message || error.message || "Google login failed",
-      );
-    }
-  },
-);
 
 export const registerUserThunk = createAsyncThunk(
   "auth/registerUser",
@@ -149,17 +130,6 @@ const authSlice = createSlice({
       .addCase(registerUserThunk.rejected, (state, action) => {
         state.user = null;
         state.authError = action.payload || "Registration failed";
-      })
-      .addCase(googleLoginThunk.pending, (state) => {
-        state.authError = "";
-      })
-      .addCase(googleLoginThunk.fulfilled, (state, action) => {
-        state.user = action.payload;
-        state.authError = "";
-      })
-      .addCase(googleLoginThunk.rejected, (state, action) => {
-        state.user = null;
-        state.authError = action.payload || "Google login failed";
       })
 
       .addCase(logoutUserThunk.fulfilled, (state) => {

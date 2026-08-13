@@ -20,8 +20,7 @@ class ProductService {
             });
           }
         },
-      );
-      stream.end(buffer);
+      ).end(buffer)
     });
   }
 
