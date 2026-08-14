@@ -57,9 +57,9 @@ exports.checkuser = async (req, res, next) => {
 
           // Set the new access token in the cookie
           res.cookie("accessToken", newAccessToken, {
-            httpOnly: false, // adjust based on your original cookie settings
-            secure: process.env.NODE_ENV === "production",
-            sameSite: "lax",
+            httpOnly: true,
+            secure: true,
+            sameSite: "none",
             maxAge: 15 * 60 * 1000,
           });
 
